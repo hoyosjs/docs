@@ -1,7 +1,7 @@
 ---
 title: dotnet-dump diagnostic tool - .NET CLI
 description: Learn how to install and use the dotnet-dump CLI tool to collect and analyze Windows and Linux dumps without any native debugger.
-ms.date: 11/17/2020
+ms.date: 02/17/2022
 ms.topic: reference
 ---
 # Dump collection and analysis utility (dotnet-dump)
@@ -9,7 +9,7 @@ ms.topic: reference
 **This article applies to:** ✔️ .NET Core 3.0 SDK and later versions
 
 > [!NOTE]
-> `dotnet-dump` for macOS is only supported with .NET 5 and later versions.
+> Collecting dumps using `dotnet-dump` on macOS is only supported when targetting apps running on .NET 5 and later versions.
 
 ## Install
 
@@ -34,17 +34,17 @@ There are two ways to download and install `dotnet-dump`:
   | Linux   | [x64](https://aka.ms/dotnet-dump/linux-x64) \| [arm](https://aka.ms/dotnet-dump/linux-arm) \| [arm64](https://aka.ms/dotnet-dump/linux-arm64) \| [musl-x64](https://aka.ms/dotnet-dump/linux-musl-x64) \| [musl-arm64](https://aka.ms/dotnet-dump/linux-musl-arm64) |
 
 > [!NOTE]
-> To use `dotnet-dump` on an x86 app, you need a corresponding x86 version of the tool.
+> To analyze a dump collected from an x86 appplication, you'll need to run `dotnet-dump` using the corresponding x86 version of the tool.
 
 ## Synopsis
 
 ```console
-dotnet-dump [-h|--help] [--version] <command>
+dotnet dump [-h|--help] [--version] <command>
 ```
 
 ## Description
 
-The `dotnet-dump` global tool is a way to collect and analyze Windows and Linux dumps without any native debugger involved like `lldb` on Linux. This tool is important on platforms like Alpine Linux where a fully working `lldb` isn't available. The `dotnet-dump` tool allows you to run SOS commands to analyze crashes and the garbage collector (GC), but it isn't a native debugger so things like displaying native stack frames aren't supported.
+The `dotnet-dump` global tool is a way to collect and analyze Windows and Linux memory dumps without any native debugger involved like `lldb` on Linux. The `dotnet-dump` tool allows you to run SOS commands to analyze crashes and the the state of the garbage collector (GC), but it isn't a native debugger so things like displaying native stack frames aren't supported.
 
 ## Options
 
@@ -62,6 +62,7 @@ The `dotnet-dump` global tool is a way to collect and analyze Windows and Linux 
 | ------------------------------------------- |
 | [dotnet-dump collect](#dotnet-dump-collect) |
 | [dotnet-dump analyze](#dotnet-dump-analyze) |
+| [dotnet-dump ps](#dotnet-dump-analyze) |
 
 ## dotnet-dump collect
 
@@ -85,7 +86,7 @@ dotnet-dump collect [-h|--help] [-p|--process-id] [-n|--name] [--type] [-o|--out
 
 - **`-n|--name <name>`**
 
-  Specifies the name of the process to collect a dump from.
+  Specifies the name of the process to collect a dump from. This option only works if there's only one .NET process with the given name.
 
 - **`--type <Full|Heap|Mini>`**
 
@@ -104,19 +105,19 @@ dotnet-dump collect [-h|--help] [-p|--process-id] [-n|--name] [--type] [-o|--out
   If not specified:
 
   - Defaults to *.\dump_YYYYMMDD_HHMMSS.dmp* on Windows.
-  - Defaults to *./core_YYYYMMDD_HHMMSS* on Linux.
+  - Defaults to *./core_YYYYMMDD_HHMMSS* on Unix based systems.
 
   YYYYMMDD is Year/Month/Day and HHMMSS is Hour/Minute/Second.
 
 - **`--diag`**
 
-  Enables dump collection diagnostic logging.
+  Enables dump collection diagnostic logging for dump collection diagnostics. These are logged in the context of the console of the target application.
 
 > [!NOTE]
-> On Linux and macOS, this command expects the target application and `dotnet-dump` to share the same `TMPDIR` environment variable. Otherwise, the command will time out.
+> On Linux and macOS, this command expects the target application's communication channels to be visible to `dotnet-dump`. As of now, `dotnet-dump` only checks the default communication channels, so features like diagnostic ports aren't supported. The target process must be started without these and they must share the `TMPDIR` variable.
 
 > [!NOTE]
-> To collect a dump using `dotnet-dump`, it needs to be run as the same user as the user running target process or as root. Otherwise, the tool will fail to establish a connection with the target process.
+> To collect a dump using `dotnet-dump`, it needs to be run as the same user as the user running target process or root. Otherwise, the tool will fail to establish a connection with the target process.
 
 ## dotnet-dump analyze
 
